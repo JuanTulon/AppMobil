@@ -1,4 +1,4 @@
-package com.example.movilprueba.model
+package com.example.movilprueba.data.model
 
 open class Producto(
     open val id: String,

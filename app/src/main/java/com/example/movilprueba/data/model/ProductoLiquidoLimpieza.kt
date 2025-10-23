@@ -1,4 +1,4 @@
-package com.example.movilprueba.model
+package com.example.movilprueba.data.model
 
 data class ProductoLiquidoLimpieza(
     override val id: String,
