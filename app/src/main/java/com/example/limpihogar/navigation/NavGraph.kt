@@ -16,6 +16,9 @@ import com.example.limpihogar.ui.screens.cart.CartScreen
 import com.example.limpihogar.ui.screens.catalog.CatalogScreen
 import com.example.limpihogar.ui.screens.product.ProductDetailScreen
 import com.example.limpihogar.ui.screens.profile.ProfileScreen
+import com.example.limpihogar.ui.screens.chekout.ChekoutSuccessScreen
+import com.example.limpihogar.ui.screens.chekout.CheckoutFailedScreen
+
 
 
 
@@ -86,8 +89,10 @@ fun NavGraph(
         // Carrito
         composable(Routes.CART) {
             CartScreen(
-                onNavigateToCheckoutSuccess = {},
-                onNavigateToCheckoutFailed = {}
+                onNavigateToCheckoutSuccess = {navController.navigate(Routes.CHECKOUT_SUCCESS){
+                    popUpTo(Routes.CART) { inclusive = true }
+                } },
+                onNavigateToCheckoutFailed = { navController.navigate(Routes.CHECKOUT_FAILED) }
             )
         }
         // Perfil
@@ -99,6 +104,25 @@ fun NavGraph(
                 // Navegación COMENTADA para que compile sin las pantallas
                 onNavigateToAdminProductList = { /* navController.navigate(Routes.ADMIN_PRODUCT_LIST) */ },
                 onNavigateToAddProduct = { /* navController.navigate(Routes.ADMIN_ADD_PRODUCT) */ }
+            )
+        }
+
+        //chekout
+        composable(Routes.CHECKOUT_SUCCESS) {
+            ChekoutSuccessScreen(
+                onNavigateToHome = {
+                    navController.navigate(Routes.HOME){
+                        popUpTo(0)
+                    }
+                }
+            )
+    }
+        composable(Routes.CHECKOUT_FAILED) {
+            CheckoutFailedScreen(
+                onNavigateBackToCart = {
+                    //volvemos a la pantalla anterior (el carrito)
+                    navController.popBackStack()
+                }
             )
         }
     }

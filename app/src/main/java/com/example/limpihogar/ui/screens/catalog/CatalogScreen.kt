@@ -1,6 +1,7 @@
 package com.example.limpihogar.ui.screens.catalog
 
 
+import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -32,6 +33,7 @@ import com.example.limpihogar.data.model.Product
 import com.example.limpihogar.ui.viewmodel.ProductViewModel
 import java.text.NumberFormat
 import java.util.Locale
+import androidx.compose.material.icons.filled.FilterList
 
 @Composable
 fun CatalogScreen(
@@ -40,6 +42,7 @@ fun CatalogScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
+    var showFilterMenu by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -47,11 +50,18 @@ fun CatalogScreen(
             .background(MaterialTheme.colorScheme.background)
     ) {
         // Barra de búsqueda
-        OutlinedTextField(
+        Row (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ){OutlinedTextField(
             value = searchQuery,
-            onValueChange = { searchQuery = it; viewModel.searchProducts(it) },
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            placeholder = { Text("Buscar productos...") },
+            onValueChange = { searchQuery = it
+                viewModel.searchProducts(it)
+            },
+            modifier = Modifier.weight(1f),
+            placeholder = { Text("Buscar productos") },
             leadingIcon = { Icon(Icons.Filled.Search, "Buscar") },
             shape = RoundedCornerShape(12.dp),
             singleLine = true,
@@ -60,34 +70,23 @@ fun CatalogScreen(
                 unfocusedBorderColor = MaterialTheme.colorScheme.outline
             )
         )
-
-        // Filtro de categorías
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            item {
-                CategoryChip(
-                    text = "Todos",
-                    icon = "🧼",
-                    isSelected = uiState.selectedCategory == null,
-                    onClick = { viewModel.selectCategory(null) }
-                )
-            }
-            items(uiState.categories) { category ->
-                CategoryChip(
-                    text = category.nombre,
-                    icon = category.icono, // El icono que definiste en la DB
-                    isSelected = uiState.selectedCategory?.id == category.id,
-                    onClick = { viewModel.selectCategory(category) }
-                )
-            }
+        Spacer(modifier = Modifier.width(8.dp))
+        IconButton(onClick = {showFilterMenu = true}) {
+            Icon(Icons.Filled.FilterList, "Filtrar")
         }
+    }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
+        //menu desplegable de filtro
+        if (showFilterMenu) {
+            FilterPanel(
+                categories = uiState.categories,
+                onDismiss = { showFilterMenu = false },
+                onApplyFilter = { category, priceRange ->
+                    viewModel.applyFilters(category, priceRange)
+                    showFilterMenu = false
+                }
+            )
+        }
 
         // Lista de productos
         if (uiState.isLoading) {
@@ -120,32 +119,76 @@ fun CatalogScreen(
 }
 
 @Composable
-fun CategoryChip(
-    text: String,
-    icon: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
+fun FilterPanel(
+    categories: List<Category>,
+    onDismiss: () -> Unit,
+    onApplyFilter: (Category?, String) -> Unit
 ) {
-    Surface(
-        modifier = Modifier.clickable(onClick = onClick),
-        shape = RoundedCornerShape(20.dp),
-        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-        tonalElevation = if (isSelected) 2.dp else 1.dp
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(text = icon, fontSize = 18.sp)
-            Text(
-                text = text,
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 14.sp,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-            )
+    var selectedCategory by remember { mutableStateOf<Category?>(null) }
+    var selectedPriceRange by remember { mutableStateOf("Todos") }
+    val priceRanges = listOf("Todos", "< $5000", "$5000 - $10000", "> $10000")
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Filtros") },
+        text = {
+            Column {
+                Text("Categorías", fontWeight = FontWeight.Bold)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { selectedCategory = null }
+                ) {
+                    RadioButton(
+                        selected = selectedCategory == null,
+                        onClick = { selectedCategory = null }
+                    )
+                    Text("Todas")
+                }
+                categories.forEach { category ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedCategory = category }
+                    ) {
+                        RadioButton(
+                            selected = selectedCategory == category,
+                            onClick = { selectedCategory = category }
+                        )
+                        Text(category.nombre)
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Precio", fontWeight = FontWeight.Bold)
+                priceRanges.forEach { range ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedPriceRange = range }
+                    ) {
+                        RadioButton(
+                            selected = selectedPriceRange == range,
+                            onClick = { selectedPriceRange = range }
+                        )
+                        Text(range)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = { onApplyFilter(selectedCategory, selectedPriceRange) }) {
+                Text("Aplicar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
         }
-    }
+    )
 }
 
 @Composable

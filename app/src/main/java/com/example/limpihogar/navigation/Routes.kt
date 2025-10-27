@@ -8,6 +8,10 @@ object Routes {
     const val CART = "cart"
     const val PROFILE = "profile"
 
+    const val CHECKOUT_SUCCESS = "checkout_success"
+
+    const val CHECKOUT_FAILED = "checkout_failed"
+
     fun productDetail(productId: Int) = "product_detail/$productId"
 }
 

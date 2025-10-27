@@ -8,7 +8,6 @@ import com.example.limpihogar.data.model.Category
 import com.example.limpihogar.data.model.Product
 import com.example.limpihogar.data.repository.ProductRepository
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 data class ProductUiState(
@@ -17,7 +16,8 @@ data class ProductUiState(
     val selectedCategory: Category? = null,
     val searchQuery: String = "",
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val selectedPriceRange: String = "Todos"
 )
 
 class ProductViewModel(application: Application) : AndroidViewModel(application) {
@@ -29,16 +29,7 @@ class ProductViewModel(application: Application) : AndroidViewModel(application)
     init {
         val database = LimpioHogarDatabase.getInstance(application)
         repository = ProductRepository(database.productDao(), database.categoryDao())
-        loadCategories()
         loadProducts()
-    }
-
-    private fun loadCategories() {
-        viewModelScope.launch {
-            repository.getAllCategories().collect { categories ->
-                _uiState.value = _uiState.value.copy(categories = categories)
-            }
-        }
     }
 
     private fun loadProducts() {
@@ -54,8 +45,22 @@ class ProductViewModel(application: Application) : AndroidViewModel(application)
             }
 
             productsFlow.collect { products ->
+                var filteredProducts = products
+                // Filtrado por precio
+                when (_uiState.value.selectedPriceRange) {
+                    "< $5000" -> {
+                        filteredProducts = products.filter { it.precio < 5000 }
+                    }
+                    "$5000 - $10000" -> {
+                        filteredProducts = products.filter { it.precio >= 5000 && it.precio <= 10000 }
+                    }
+                    "> $10000" -> {
+                        filteredProducts = products.filter { it.precio > 10000 }
+                    }
+                }
+
                 _uiState.value = _uiState.value.copy(
-                    products = products,
+                    products = filteredProducts,
                     isLoading = false
                 )
             }
@@ -72,8 +77,14 @@ class ProductViewModel(application: Application) : AndroidViewModel(application)
         loadProducts()
     }
 
+    fun applyFilters(category: Category?, priceRange: String) {
+        _uiState.value = _uiState.value.copy(selectedCategory = category, selectedPriceRange = priceRange, searchQuery = "")
+        loadProducts()
+    }
+
     suspend fun getProductById(productId: Int): Product? {
         return repository.getProductById(productId)
     }
 }
+
 

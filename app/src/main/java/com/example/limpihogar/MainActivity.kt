@@ -19,7 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.limpihogar.navigation.BottomNavItem
 import com.example.limpihogar.navigation.NavGraph
 import com.example.limpihogar.navigation.Routes
-import com.example.limpihogar.ui.theme.LimpioHogarTheme //
+import com.example.limpihogar.ui.theme.LimpioHogarTheme
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -27,7 +27,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            // Usa el tema de tu proyecto "MovilPrueba" que ya definiste
             LimpioHogarTheme {
                 MainApp()
             }
