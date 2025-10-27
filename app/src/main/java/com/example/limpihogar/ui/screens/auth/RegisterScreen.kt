@@ -96,16 +96,16 @@ fun RegisterScreen(
 
             Text(
                 text = "Únete a LimpioHogar",
+                style = MaterialTheme.typography.headlineSmall, // Usar tipografía del tema
                 fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = MaterialTheme.colorScheme.onBackground, // Color de texto principal
                 textAlign = TextAlign.Center
             )
 
             Text(
                 text = "Debes ser mayor de 18 años para registrarte",
-                color = Color.Gray,
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.bodySmall, // Texto más pequeño
+                color = MaterialTheme.colorScheme.onSurfaceVariant, // Color secundario
                 textAlign = TextAlign.Center
             )
 
@@ -281,8 +281,8 @@ fun RegisterScreen(
             ) {
                 Text(
                     text = "Ya tengo una cuenta",
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontSize = 14.sp
+                    color = MaterialTheme.colorScheme.secondary, // Color secundario
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
 

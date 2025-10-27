@@ -37,15 +37,16 @@ fun ProfileScreen(
             TopAppBar(
                 title = { Text("Mi Perfil") },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = MaterialTheme.colorScheme.primary, // Color primario
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary, // Texto blanco
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary // Icono blanco
                 ),
                 actions = {
                     IconButton(onClick = { showLogoutDialog = true }) {
                         Icon(
                             imageVector = Icons.Filled.Logout,
                             contentDescription = "Cerrar sesión"
+                            // El color lo toma del actionIconContentColor
                         )
                     }
                 }
@@ -62,72 +63,81 @@ fun ProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // --- Sección de Avatar y Nombre ---
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center
-            ){}
-
+            Spacer(modifier = Modifier.height(8.dp)) // Pequeño espacio arriba
+            // ---Nombre ---
             if (currentUser != null) {
                 Text(
                     text = currentUser.nombre,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.headlineSmall, // Tamaño nombre
+                    color = MaterialTheme.colorScheme.onBackground, // Color texto principal
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = currentUser.email,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyLarge, // Tamaño email
+                    color = MaterialTheme.colorScheme.onSurfaceVariant // Color texto secundario
                 )
+            } else {
+                // Placeholder si el usuario no carga
+                Text("Cargando información...", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             // --- Tarjeta de Información Personal ---
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(16.dp), // Bordes redondeados
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
+                    containerColor = MaterialTheme.colorScheme.surface, // Color superficie (blanco/gris claro)
+                    contentColor = MaterialTheme.colorScheme.onSurface // Color contenido (oscuro)
                 ),
-                elevation = CardDefaults.cardElevation(2.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp) // Sombra sutil
             ) {
                 Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    modifier = Modifier.padding(20.dp), // Padding interno
+                    verticalArrangement = Arrangement.spacedBy(16.dp) // Espacio entre items
                 ) {
+                    Text( // Título opcional para la tarjeta
+                        text = "Información Personal",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary // Título con color primario
+                    )
+                    Divider() // Separador
                     ProfileInfoItem(
                         icon = Icons.Filled.Email,
                         label = "Email",
                         value = currentUser?.email ?: "No disponible"
                     )
-                    Divider()
+                    Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)) // Separador más sutil
                     ProfileInfoItem(
                         icon = Icons.Filled.Badge, // Icono para RUT
                         label = "RUT",
-                        value = currentUser?.rut ?: "No disponible"
+                        value = currentUser?.rut ?: "No ingresado"
                     )
-                    Divider()
+                    Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
                     ProfileInfoItem(
                         icon = Icons.Filled.Home, // Icono para Dirección
                         label = "Dirección",
-                        value = currentUser?.direccion ?: "No disponible"
+                        value = currentUser?.direccion ?: "No ingresada"
+                    )
+                    Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+                    ProfileInfoItem(
+                        icon = Icons.Filled.Cake, // Icono para Cumpleaños
+                        label = "Fecha de Nacimiento",
+                        value = currentUser?.fechaNacimiento ?: "No ingresada"
                     )
                 }
             }
 
-            // --- Tarjeta de Panel de Administrador (REQUISITO EVALUACIÓN) ---
+            // --- Tarjeta de Panel de Administrador ---
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant, // Un color diferente
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer, // Color diferente
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer // Contenido que contraste
                 ),
-                elevation = CardDefaults.cardElevation(2.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
                     modifier = Modifier
@@ -139,23 +149,24 @@ fun ProfileScreen(
                         text = "Panel de Administrador",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
+                        // El color lo toma del contentColor de la Card
                     )
                     // Botón para ver lista (Visual)
                     Button(
                         onClick = onNavigateToAdminProductList,
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )
+                        // Colores por defecto del tema para botón primario
+                        // colors = ButtonDefaults.buttonColors(...)
                     ) {
                         Icon(Icons.Filled.Settings, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Gestionar Productos (Visual)")
                     }
-                    // Botón para añadir producto (Visual)
+                    // Botón para añadir producto (Visual) - Usamos OutlinedButton para diferenciar
                     OutlinedButton(
                         onClick = onNavigateToAddProduct,
                         modifier = Modifier.fillMaxWidth()
+                        // Colores por defecto del tema para botón outlined
                     ) {
                         Icon(Icons.Filled.Add, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
@@ -164,7 +175,7 @@ fun ProfileScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f)) // Espacio flexible
+            Spacer(modifier = Modifier.weight(1f)) // Empuja el botón de logout hacia abajo
 
             // --- Botón de Cerrar Sesión ---
             Button(
@@ -173,58 +184,48 @@ fun ProfileScreen(
                     .fillMaxWidth()
                     .height(50.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error // Color rojo para logout
+                    containerColor = MaterialTheme.colorScheme.error, // Color de error del tema
+                    contentColor = MaterialTheme.colorScheme.onError // Color del contenido sobre error
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Logout,
-                    contentDescription = null
-                )
+                Icon(Icons.Filled.Logout, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Cerrar Sesión")
+                Text("Cerrar Sesión", fontWeight = FontWeight.Bold)
             }
-        }
-    }
+        } // Fin Column principal
+    } // Fin Scaffold
 
     // --- Diálogo de Confirmación de Logout ---
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
-            title = {
-                Text(
-                    text = "Cerrar Sesión",
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Text("¿Estás seguro que deseas cerrar sesión?")
-            },
+            title = { Text("Cerrar Sesión", fontWeight = FontWeight.Bold) },
+            text = { Text("¿Estás seguro que deseas cerrar sesión?") },
             confirmButton = {
                 Button(
                     onClick = {
                         viewModel.logout()
-                        onLogout()
+                        onLogout() // Llama a la navegación de vuelta al login
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
+                        containerColor = MaterialTheme.colorScheme.error // Botón rojo
                     )
                 ) {
                     Text("Sí, cerrar sesión")
                 }
             },
             dismissButton = {
-                TextButton(
-                    onClick = { showLogoutDialog = false }
-                ) {
-                    Text("Cancelar")
+                TextButton(onClick = { showLogoutDialog = false }) {
+                    Text("Cancelar") // Usa el color primario por defecto
                 }
             }
+            // Los colores del AlertDialog los toma del tema
         )
     }
 }
 
-// --- Componente de Item de Información de Perfil ---
+// --- Componente de Item de Información de Perfil (Sin cambios visuales necesarios) ---
 @Composable
 private fun ProfileInfoItem(
     icon: ImageVector,
@@ -239,21 +240,21 @@ private fun ProfileInfoItem(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
+            tint = MaterialTheme.colorScheme.primary, // Icono con color primario
             modifier = Modifier.size(24.dp)
         )
         Column(
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+            verticalArrangement = Arrangement.spacedBy(2.dp) // Menos espacio entre label y value
         ) {
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.labelMedium, // Estilo para etiquetas
+                color = MaterialTheme.colorScheme.onSurfaceVariant // Color secundario
             )
             Text(
                 text = value,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodyLarge, // Estilo para el valor
+                color = MaterialTheme.colorScheme.onSurface, // Color principal
                 fontWeight = FontWeight.Medium
             )
         }

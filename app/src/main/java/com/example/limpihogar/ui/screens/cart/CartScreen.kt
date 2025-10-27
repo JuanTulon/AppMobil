@@ -46,7 +46,7 @@ fun CartScreen(
         Surface(
             modifier = Modifier.fillMaxWidth(),
             color = MaterialTheme.colorScheme.surfaceVariant,
-            shadowElevation = 4.dp
+            shadowElevation = 2.dp
         ) {
             Row(
                 modifier = Modifier.padding(16.dp),
@@ -62,14 +62,13 @@ fun CartScreen(
                 Column {
                     Text(
                         text = "Mi Carrito",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.headlineSmall, // Tamaño de título
+                        color = MaterialTheme.colorScheme.onSurface // Color de texto principal
                     )
                     Text(
                         text = "${cartItems.size} productos",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                        fontSize = 14.sp
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant // Color de texto secundario
                     )
                 }
             }
@@ -88,14 +87,13 @@ fun CartScreen(
                     Text(text = "🛒", fontSize = 80.sp)
                     Text(
                         text = "Tu carrito está vacío",
-                        color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.titleLarge, // Título
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
-                        text = "Explora nuestro catálogo y agrega productos",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = "Explora nuestro catálogo y agrega los productos que necesitas.",
                         style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, // Texto secundario
                         textAlign = TextAlign.Center
                     )
                 }
@@ -155,8 +153,8 @@ fun CartScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Subtotal", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(formatPrice(cartTotal ?: 0.0), color = MaterialTheme.colorScheme.onSurface)
+                        Text("Subtotal", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(formatPrice(cartTotal ?: 0.0), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
                     }
 
                     Divider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -166,8 +164,8 @@ fun CartScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Total", color = MaterialTheme.colorScheme.onSurface, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                        Text(formatPrice(cartTotal ?: 0.0), color = MaterialTheme.colorScheme.primary, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                        Text("Total", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                        Text(formatPrice(cartTotal ?: 0.0), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                     }
 
                     // Botón de compra
@@ -181,12 +179,9 @@ fun CartScreen(
                             }
                         },
                         modifier = Modifier.fillMaxWidth().height(56.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary, // Color primario
-                            contentColor = MaterialTheme.colorScheme.onPrimary // Texto blanco
-                        ),
-                        shape = RoundedCornerShape(12.dp)                    ) {
-                        Text("Finalizar Compra", color = MaterialTheme.colorScheme.onPrimary, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        shape = RoundedCornerShape(12.dp) // Bordes redondeados
+                    ) {
+                        Text("Finalizar Compra", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -229,21 +224,20 @@ fun CartItemCard(
             ) {
                 Text(
                     text = cartItem.nombre,
-                    color = MaterialTheme.colorScheme.onSurface, // Texto principal
                     style = MaterialTheme.typography.titleMedium,
-                    maxLines = 2,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2 // Evita que nombres largos descuadren
                 )
                 Text(
                     text = formatPrice(cartItem.precio),
-                    color = MaterialTheme.colorScheme.primary, // Color primario para precio
                     style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold
+                    color = MaterialTheme.colorScheme.primary, // Precio con color primario
+                    fontWeight = FontWeight.SemiBold
                 )
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween // Separa controles y botón
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth() // Ocupa todo el ancho disponible
                 ) {
                     // Controles de cantidad
                     Surface(
@@ -266,6 +260,7 @@ fun CartItemCard(
                             // Texto que muestra la cantidad actual
                             Text(
                                 text = "${cartItem.cantidad}",
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 12.dp) // Espacio alrededor del número

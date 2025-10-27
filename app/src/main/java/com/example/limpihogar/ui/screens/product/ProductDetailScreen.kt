@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -60,7 +61,8 @@ fun ProductDetailScreen(
                     containerColor = MaterialTheme.colorScheme.surface,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                     navigationIconContentColor = MaterialTheme.colorScheme.onSurface
-                )
+                ),
+                modifier = Modifier.shadow(elevation = 4.dp)
             )
         },
         // Fondo claro
@@ -105,22 +107,21 @@ fun ProductDetailScreen(
                     // --- Nombre y Marca (ACTUALIZADO) ---
                     Text(
                         text = product!!.nombre,
-                        color = MaterialTheme.colorScheme.onBackground, // Texto oscuro
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.headlineMedium, // Tamaño de título
+                        color = MaterialTheme.colorScheme.onBackground
                     )
 
                     Text(
                         text = "Marca: ${product!!.marca}", // Campo actualizado
-                        color = MaterialTheme.colorScheme.onSurfaceVariant, // Texto gris
-                        fontSize = 16.sp
+                        style = MaterialTheme.typography.titleMedium, // Un poco más grande
+                        color = MaterialTheme.colorScheme.onSurfaceVariant // Color secundario
                     )
 
                     product!!.formato?.let {
                         Text(
                             text = "Formato: $it", // Campo nuevo
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 16.sp
+                            style = MaterialTheme.typography.titleMedium, // Un poco más grande
+                            color = MaterialTheme.colorScheme.onSurfaceVariant // Color secundario
                         )
                     }
 
@@ -128,7 +129,7 @@ fun ProductDetailScreen(
                     // Requerido por la evaluación ("opiniones/valoraciones")
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             repeat(5) { index ->
@@ -141,10 +142,11 @@ fun ProductDetailScreen(
                                 )
                             }
                         }
+                        Spacer(Modifier.width(4.dp))
                         Text(
                             text = "${product!!.calificacion} (${product!!.numeroReviews} reseñas)",
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = 14.sp
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant // Color secundario
                         )
                     }
 
@@ -155,8 +157,8 @@ fun ProductDetailScreen(
                         if (product!!.precioAnterior != null) {
                             Text(
                                 text = "Antes: ${formatPrice(product!!.precioAnterior!!)}",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant, // Color secundario
                                 textDecoration = TextDecoration.LineThrough
                             )
                             val descuento = ((product!!.precioAnterior!! - product!!.precio) /
@@ -164,25 +166,24 @@ fun ProductDetailScreen(
                             Text(
                                 text = "¡$descuento% de descuento!",
                                 color = Color(0xFF28A745), // Un verde limpio
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold
                             )
                         }
                         Text(
                             text = formatPrice(product!!.precio),
-                            color = MaterialTheme.colorScheme.primary, // Color del tema
-                            fontSize = 32.sp,
+                            style = MaterialTheme.typography.headlineMedium, // Precio destacado
+                            color = MaterialTheme.colorScheme.primary, // Color primario
                             fontWeight = FontWeight.Bold
                         )
                     }
 
-                    // --- Stock (ACTUALIZADO) ---
+                    // Stock
+                    val stockColor = if (product!!.stock > 0) Color(0xFF28A745) else MaterialTheme.colorScheme.error
                     Text(
-                        text = if (product!!.stock > 0)
-                            "Stock disponible: ${product!!.stock} unidades"
-                        else "Producto agotado",
-                        color = if (product!!.stock > 0) Color(0xFF28A745) else MaterialTheme.colorScheme.error,
-                        fontSize = 14.sp,
+                        text = if (product!!.stock > 0) "Stock disponible: ${product!!.stock} unidades" else "Producto agotado",
+                        color = stockColor,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium
                     )
 
@@ -192,15 +193,14 @@ fun ProductDetailScreen(
                     // Requerido por la evaluación ("descripción extendida")
                     Text(
                         text = "Descripción",
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.titleMedium, // Título para la sección
+                        color = MaterialTheme.colorScheme.onBackground
                     )
 
                     Text(
                         text = product!!.descripcion,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, // Texto de descripción
                         lineHeight = 20.sp
                     )
 
@@ -230,8 +230,10 @@ fun ProductDetailScreen(
                         .padding(16.dp)
                         .height(56.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary, // Color del tema
-                        disabledContainerColor = MaterialTheme.colorScheme.outline
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                     ),
                     enabled = product!!.stock > 0,
                     shape = RoundedCornerShape(12.dp)
@@ -244,8 +246,7 @@ fun ProductDetailScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = if (product!!.stock > 0) "Agregar al Carrito" else "Sin Stock",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -261,19 +262,16 @@ fun ProductDetailScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
-                        .padding(bottom = 90.dp), // Justo encima del botón
+                        .padding(bottom = (56.dp + 16.dp + 8.dp)), // Justo encima del botón
                     contentAlignment = Alignment.BottomCenter
-                ) {
-                    Surface(
+                )  {
+                    Snackbar( // Usamos Snackbar en lugar de Surface para mejor estilo
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        color = Color(0xFF28A745), // Verde limpio
-                        tonalElevation = 4.dp
+                        containerColor = Color(0xFF28A745), // Verde éxito
+                        contentColor = Color.White // Texto blanco
                     ) {
                         Text(
                             text = "✓ Producto agregado al carrito",
-                            modifier = Modifier.padding(16.dp),
-                            color = Color.White, // Texto blanco
                             fontWeight = FontWeight.Bold
                         )
                     }
