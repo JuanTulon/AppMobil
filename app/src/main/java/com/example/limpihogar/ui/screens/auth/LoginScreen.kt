@@ -24,15 +24,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.limpihogar.ui.viewmodel.AuthViewModel
 
-// 1. Paleta de colores "limpia"
-val colorPrimario = Color(0xFF007BFF) // Un azul limpio y corporativo
-val colorSecundario = Color(0xFF28A745) // Un verde fresco
-val colorFondo = Color.White
-val colorTexto = Color.Black
-val colorTextoSecundario = Color.Gray
-
-// 2. Quitamos la fuente personalizada "Orbitron"
-
 @Composable
 fun LoginScreen(
     onNavigateToRegister: () -> Unit,
@@ -55,7 +46,7 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorFondo) // Antes Color.Black
+            .background(MaterialTheme.colorScheme.background) // Antes Color.Black
     ) {
         Column(
             modifier = Modifier
@@ -76,11 +67,11 @@ fun LoginScreen(
                 // fontFamily = orbitronFont, // Quitamos fuente gamer
                 fontWeight = FontWeight.Bold,
                 fontSize = 32.sp,
-                color = colorTexto // Antes Color.White
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = "Tu aliado en la limpieza", // Nuevo eslogan
-                color = colorPrimario, // Usamos el nuevo color
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
             )
@@ -99,19 +90,19 @@ fun LoginScreen(
                     Icon(
                         imageVector = Icons.Filled.Email,
                         contentDescription = null,
-                        tint = colorPrimario
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = colorTexto,
-                    unfocusedTextColor = colorTexto,
-                    focusedBorderColor = colorPrimario,
-                    unfocusedBorderColor = Color.LightGray,
-                    focusedLabelColor = colorPrimario,
-                    unfocusedLabelColor = colorTextoSecundario,
-                    cursorColor = colorPrimario
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline, // Borde normal
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant, // Color secundario para label
+                    cursorColor = MaterialTheme.colorScheme.primary
                 ),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
@@ -131,13 +122,13 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = colorTexto,
-                    unfocusedTextColor = colorTexto,
-                    focusedBorderColor = colorPrimario,
-                    unfocusedBorderColor = Color.LightGray,
-                    focusedLabelColor = colorPrimario,
-                    unfocusedLabelColor = colorTextoSecundario,
-                    cursorColor = colorPrimario
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline, // Borde normal
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant, // Color secundario para label
+                    cursorColor = MaterialTheme.colorScheme.primary
                 ),
                 visualTransformation = if (passwordVisible)
                     VisualTransformation.None else PasswordVisualTransformation(),
@@ -152,7 +143,7 @@ fun LoginScreen(
                                 Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                             contentDescription = if (passwordVisible)
                                 "Ocultar contraseña" else "Mostrar contraseña",
-                            tint = colorTextoSecundario
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -162,7 +153,7 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = authState.errorMessage!!,
-                    color = Color.Red,
+                    color = MaterialTheme.colorScheme.error,
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center
                 )
@@ -175,7 +166,8 @@ fun LoginScreen(
                 onClick = { viewModel.login(email, password) },
                 enabled = !authState.isLoading && email.isNotBlank() && password.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = colorPrimario, // Nuevo color
+                    containerColor = MaterialTheme.colorScheme.primary, // Color primario
+                    contentColor = MaterialTheme.colorScheme.onPrimary, // Color del texto/icono sobre primario
                     disabledContainerColor = Color.Gray
                 ),
                 modifier = Modifier
@@ -184,15 +176,13 @@ fun LoginScreen(
             ) {
                 if (authState.isLoading) {
                     CircularProgressIndicator(
-                        color = Color.White, // El spinner sí puede ser blanco
+                        color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(24.dp)
                     )
                 } else {
                     Text(
                         text = "Iniciar Sesión",
-                        color = Color.White,
                         fontSize = 18.sp,
-                        // fontFamily = orbitronFont, // Quitamos fuente
                         fontWeight = FontWeight.SemiBold
                     )
                 }
@@ -206,7 +196,7 @@ fun LoginScreen(
             ) {
                 Text(
                     text = "¿No tienes cuenta? Regístrate",
-                    color = colorSecundario, // Nuevo color
+                    color = MaterialTheme.colorScheme.secondary,
                     fontSize = 14.sp
                 )
             }

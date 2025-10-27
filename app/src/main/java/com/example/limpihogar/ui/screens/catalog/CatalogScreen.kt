@@ -98,7 +98,7 @@ fun CatalogScreen(
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
                     text = "No se encontraron productos",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 18.sp
                 )
             }
@@ -130,7 +130,7 @@ fun CategoryChip(
         modifier = Modifier.clickable(onClick = onClick),
         shape = RoundedCornerShape(20.dp),
         color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-        tonalElevation = 2.dp
+        tonalElevation = if (isSelected) 2.dp else 1.dp
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -219,7 +219,7 @@ fun ProductCard(
                     Icon(
                         imageVector = Icons.Filled.Star,
                         contentDescription = "Rating",
-                        tint = androidx.compose.ui.graphics.Color(0xFFFFA500),
+                        tint = Color(0xFFFFA500),
                         modifier = Modifier.size(16.dp)
                     )
                     Text(

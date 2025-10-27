@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.limpihogar.ui.viewmodel.AuthViewModel
+import androidx.compose.ui.draw.shadow
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,7 +53,12 @@ fun RegisterScreen(
             onRegisterSuccess()
         }
     }
-
+    // 3. Cambiamos el fondo a Blanco
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background) // Antes Color.Black
+    )
     Scaffold(
         topBar = {
             TopAppBar(
@@ -63,9 +69,11 @@ fun RegisterScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface
+                ),
+                modifier = Modifier.shadow(elevation = 4.dp)
             )
         },
         containerColor = MaterialTheme.colorScheme.background
