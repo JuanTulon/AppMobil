@@ -1,6 +1,5 @@
 package com.example.limpihogar.ui.screens.auth
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -28,7 +27,7 @@ import com.example.limpihogar.ui.viewmodel.AuthViewModel
 @Composable
 fun LoginScreen(
     onNavigateToRegister: () -> Unit,
-    onLoginSuccess: () -> Unit,
+    onLoginSuccess: (isAdmin: Boolean) -> Unit, // 🔹 Ahora recibe un parámetro para saber si es admin
     viewModel: AuthViewModel = viewModel()
 ) {
     var email by remember { mutableStateOf("") }
@@ -37,17 +36,18 @@ fun LoginScreen(
 
     val authState by viewModel.authState.collectAsState()
 
+    // 🔹 Cuando el usuario inicia sesión correctamente, verificamos su rol
     LaunchedEffect(authState.isLoggedIn) {
-        if (authState.isLoggedIn) {
-            onLoginSuccess()
+        if (authState.isLoggedIn && authState.currentUser != null) {
+            val isAdmin = authState.currentUser?.role == "admin"
+            onLoginSuccess(isAdmin) // ⤵️ Llama a la función con el rol
         }
     }
 
-    // 3. Cambiamos el fondo a Blanco
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background) // Antes Color.Black
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             modifier = Modifier
@@ -57,21 +57,16 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // 4. Cambiamos el icono y el branding
-            Text(
-                text = "🧼", // Icono de limpieza
-                fontSize = 80.sp
-            )
+            Text(text = "🧼", fontSize = 80.sp)
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "LimpioHogar", // Nuevo nombre
-                // fontFamily = orbitronFont, // Quitamos fuente gamer
+                text = "LimpioHogar",
                 fontWeight = FontWeight.Bold,
                 fontSize = 32.sp,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = "Tu aliado en la limpieza", // Nuevo eslogan
+                text = "Tu aliado en la limpieza",
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
@@ -79,7 +74,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            // 5. Ajustamos los colores de los OutlinedTextField para tema claro
             OutlinedTextField(
                 value = email,
                 onValueChange = {
@@ -100,9 +94,9 @@ fun LoginScreen(
                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
                     unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline, // Borde normal
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                     focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant, // Color secundario para label
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     cursorColor = MaterialTheme.colorScheme.primary
                 ),
                 keyboardOptions = KeyboardOptions(
@@ -128,15 +122,14 @@ fun LoginScreen(
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),
-
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
                     unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline, // Borde normal
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                     focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant, // Color secundario para label
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     cursorColor = MaterialTheme.colorScheme.primary
                 ),
                 visualTransformation = if (passwordVisible)
@@ -170,13 +163,12 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // 6. Ajustamos los botones
             Button(
                 onClick = { viewModel.login(email, password) },
                 enabled = !authState.isLoading && email.isNotBlank() && password.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary, // Color primario
-                    contentColor = MaterialTheme.colorScheme.onPrimary, // Color del texto/icono sobre primario
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                     disabledContainerColor = Color.Gray
                 ),
                 modifier = Modifier

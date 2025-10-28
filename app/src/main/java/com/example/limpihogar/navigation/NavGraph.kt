@@ -1,6 +1,5 @@
 package com.example.limpihogar.navigation
 
-
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
@@ -18,9 +17,7 @@ import com.example.limpihogar.ui.screens.product.ProductDetailScreen
 import com.example.limpihogar.ui.screens.profile.ProfileScreen
 import com.example.limpihogar.ui.screens.chekout.ChekoutSuccessScreen
 import com.example.limpihogar.ui.screens.chekout.CheckoutFailedScreen
-
-
-
+import com.example.limpihogar.ui.screens.admin.AdminDashboardScreen // 🔹 Import para el panel admin
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -34,25 +31,30 @@ fun NavGraph(
         startDestination = startDestination,
         modifier = modifier
     ) {
-        // Autenticación
+        // 🔹 LOGIN
         composable(Routes.LOGIN) {
             LoginScreen(
                 onNavigateToRegister = {
                     navController.navigate(Routes.REGISTER)
                 },
-                onLoginSuccess = {
-                    navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.LOGIN) { inclusive = true }
+                onLoginSuccess = { isAdmin ->
+                    if (isAdmin) {
+                        navController.navigate(Routes.ADMIN_DASHBOARD) { // 👑 admin
+                            popUpTo(Routes.LOGIN) { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate(Routes.HOME) { // 🛍 usuario normal
+                            popUpTo(Routes.LOGIN) { inclusive = true }
+                        }
                     }
                 }
             )
         }
 
+        // 🔹 REGISTER
         composable(Routes.REGISTER) {
             RegisterScreen(
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
+                onNavigateBack = { navController.popBackStack() },
                 onRegisterSuccess = {
                     navController.navigate(Routes.HOME) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
@@ -61,7 +63,7 @@ fun NavGraph(
             )
         }
 
-        // Pantalla principal (Catálogo)
+        // 🔹 HOME / CATÁLOGO
         composable(Routes.HOME) {
             CatalogScreen(
                 onProductClick = { productId ->
@@ -70,32 +72,33 @@ fun NavGraph(
             )
         }
 
-        // Detalle de producto
+        // 🔹 PRODUCT DETAIL
         composable(
             route = Routes.PRODUCT_DETAIL,
-            arguments = listOf(
-                navArgument("productId") { type = NavType.IntType }
-            )
+            arguments = listOf(navArgument("productId") { type = NavType.IntType })
         ) { backStackEntry ->
             val productId = backStackEntry.arguments?.getInt("productId") ?: 0
             ProductDetailScreen(
                 productId = productId,
-                onNavigateBack = {
-                    navController.popBackStack()
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // 🔹 CART
+        composable(Routes.CART) {
+            CartScreen(
+                onNavigateToCheckoutSuccess = {
+                    navController.navigate(Routes.CHECKOUT_SUCCESS) {
+                        popUpTo(Routes.CART) { inclusive = true }
+                    }
+                },
+                onNavigateToCheckoutFailed = {
+                    navController.navigate(Routes.CHECKOUT_FAILED)
                 }
             )
         }
 
-        // Carrito
-        composable(Routes.CART) {
-            CartScreen(
-                onNavigateToCheckoutSuccess = {navController.navigate(Routes.CHECKOUT_SUCCESS){
-                    popUpTo(Routes.CART) { inclusive = true }
-                } },
-                onNavigateToCheckoutFailed = { navController.navigate(Routes.CHECKOUT_FAILED) }
-            )
-        }
-        // Perfil
+        // 🔹 PROFILE
         composable(Routes.PROFILE) {
             ProfileScreen(
                 onLogout = {
@@ -104,23 +107,23 @@ fun NavGraph(
             )
         }
 
-        //chekout
+        // 🔹 CHECKOUT SUCCESS
         composable(Routes.CHECKOUT_SUCCESS) {
             ChekoutSuccessScreen(
                 onNavigateToHome = {
-                    navController.navigate(Routes.HOME){
-                        popUpTo(0)
-                    }
+                    navController.navigate(Routes.HOME) { popUpTo(0) }
                 }
             )
-    }
+        }
+
+        // 🔹 CHECKOUT FAILED
         composable(Routes.CHECKOUT_FAILED) {
-            CheckoutFailedScreen(
-                onNavigateBackToCart = {
-                    //volvemos a la pantalla anterior (el carrito)
-                    navController.popBackStack()
-                }
-            )
+            CheckoutFailedScreen(onNavigateBackToCart = { navController.popBackStack() })
+        }
+
+        // 🔹 NUEVO: PANEL DE ADMINISTRADOR
+        composable(Routes.ADMIN_DASHBOARD) {
+            AdminDashboardScreen(navController)
         }
     }
 }

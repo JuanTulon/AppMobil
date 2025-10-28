@@ -18,7 +18,6 @@ import java.time.Period
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
-
 data class AuthState(
     val isLoading: Boolean = false,
     val isLoggedIn: Boolean = false,
@@ -42,25 +41,29 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
             try {
-                // El repositorio ahora usa BCrypt.checkpw
                 val user = repository.login(email.trim(), password)
                 if (user != null) {
                     _authState.value = _authState.value.copy(
-                        isLoading = false, isLoggedIn = true, currentUser = user
+                        isLoading = false,
+                        isLoggedIn = true,
+                        currentUser = user
                     )
                 } else {
                     _authState.value = _authState.value.copy(
-                        isLoading = false, errorMessage = "Email o contraseña incorrectos"
+                        isLoading = false,
+                        errorMessage = "Email o contraseña incorrectos"
                     )
                 }
             } catch (e: Exception) {
                 _authState.value = _authState.value.copy(
-                    isLoading = false, errorMessage = "Error al iniciar sesión: ${e.message}"
+                    isLoading = false,
+                    errorMessage = "Error al iniciar sesión: ${e.message}"
                 )
             }
         }
     }
 
+    // --- REGISTER ---
     @RequiresApi(Build.VERSION_CODES.O)
     fun register(
         nombre: String,
@@ -68,87 +71,101 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         password: String,
         fechaNacimiento: String,
         rut: String,
-        direccion: String
+        direccion: String,
+        role: String = "user" // 🔹 nuevo parámetro con valor por defecto
     ) {
         viewModelScope.launch {
             _authState.value = _authState.value.copy(isLoading = true, errorMessage = null)
             try {
                 // --- Validaciones ---
                 if (!isValidEmail(email.trim())) {
-                    _authState.value = _authState.value.copy(isLoading = false, errorMessage = "Email inválido")
+                    _authState.value = _authState.value.copy(
+                        isLoading = false,
+                        errorMessage = "Email inválido"
+                    )
                     return@launch
                 }
-                if (!isValidRut(rut.trim())) { // <-- Validación RUT
-                    _authState.value = _authState.value.copy(isLoading = false, errorMessage = "RUT inválido (formato: 12345678-9)")
+                if (!isValidRut(rut.trim())) {
+                    _authState.value = _authState.value.copy(
+                        isLoading = false,
+                        errorMessage = "RUT inválido (formato: 12345678-9)"
+                    )
                     return@launch
                 }
-                if (direccion.trim().isEmpty()) { // <-- Validación Dirección
-                    _authState.value = _authState.value.copy(isLoading = false, errorMessage = "La dirección no puede estar vacía")
+                if (direccion.trim().isEmpty()) {
+                    _authState.value = _authState.value.copy(
+                        isLoading = false,
+                        errorMessage = "La dirección no puede estar vacía"
+                    )
                     return@launch
                 }
-                if (!isOver18(fechaNacimiento)) { // Ahora solo hay una función isOver18
-                    _authState.value = _authState.value.copy(isLoading = false, errorMessage = "Debes ser mayor de 18 años")
+                if (!isOver18(fechaNacimiento)) {
+                    _authState.value = _authState.value.copy(
+                        isLoading = false,
+                        errorMessage = "Debes ser mayor de 18 años"
+                    )
                     return@launch
                 }
                 if (password.length < 6) {
-                    _authState.value = _authState.value.copy(isLoading = false, errorMessage = "La contraseña debe tener al menos 6 caracteres")
+                    _authState.value = _authState.value.copy(
+                        isLoading = false,
+                        errorMessage = "La contraseña debe tener al menos 6 caracteres"
+                    )
                     return@launch
                 }
 
-                // --- Creación del User ---
+                // --- Crear el usuario ---
                 val user = User(
                     nombre = nombre.trim(),
                     email = email.trim(),
                     password = password,
                     fechaNacimiento = fechaNacimiento.trim(),
                     rut = rut.trim(),
-                    direccion = direccion.trim()
+                    direccion = direccion.trim(),
+                    role = role // 🔹 se guarda el rol (admin o user)
                 )
 
-                // --- Llamada al Repositorio ---
-                val result = repository.registerUser(user) // El repo hashea y guarda
+                // --- Guardar en la base de datos ---
+                val result = repository.registerUser(user)
                 if (result.isSuccess) {
-                    login(email, password) // Usamos el email y pass originales para el autologin
+                    login(email, password)
                 } else {
-                    // Muestra el error específico (ej: "Email ya existe")
                     _authState.value = _authState.value.copy(
                         isLoading = false,
-                        errorMessage = result.exceptionOrNull()?.message ?: "Error desconocido al registrar"
+                        errorMessage = result.exceptionOrNull()?.message
+                            ?: "Error desconocido al registrar"
                     )
                 }
             } catch (e: Exception) {
                 _authState.value = _authState.value.copy(
-                    isLoading = false, errorMessage = "Error al registrarse: ${e.message}"
+                    isLoading = false,
+                    errorMessage = "Error al registrarse: ${e.message}"
                 )
             }
         }
     }
 
-    // --- LOGOUT y CLEAR ERROR ---
+    // --- LOGOUT ---
     fun logout() {
-        _authState.value = AuthState() // Resetea el estado
+        _authState.value = AuthState()
     }
 
     fun clearError() {
         _authState.value = _authState.value.copy(errorMessage = null)
     }
 
-    // --- Funciones de Validación Privadas ---
+    // --- VALIDACIONES ---
     private fun isValidEmail(email: String): Boolean {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
-    // --- Validación rut formato y calculo matematico ---
     private fun isValidRut(rut: String): Boolean {
         try {
-            // 1. LIMPIEZA Y FORMATO BÁSICO
-            val cleanRut = rut.replace(Regex("[.-]"), "").uppercase() // Quita puntos y guion
-            if (cleanRut.length !in 8..9) return false // Comprueba el largo
+            val cleanRut = rut.replace(Regex("[.-]"), "").uppercase()
+            if (cleanRut.length !in 8..9) return false
 
-            val body = cleanRut.dropLast(1).toInt() // Separa el cuerpo y lo convierte a número
-            val verifier = cleanRut.last() // Obtiene el dígito verificador ingresado
-
-            // 2. CÁLCULO MATEMÁTICO (MÓDULO 11)
+            val body = cleanRut.dropLast(1).toInt()
+            val verifier = cleanRut.last()
             var m = 0
             var s = 1
             var t = body
@@ -157,12 +174,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 t /= 10
             }
             val dvCalculado = if (s > 0) (s + 47).toChar() else 'K'
-
-            // 3. COMPARACIÓN FINAL
-            return verifier == dvCalculado // Compara si el dígito ingresado es igual al calculado
-
+            return verifier == dvCalculado
         } catch (e: Exception) {
-            // Si algo falla (ej. hay letras en el cuerpo del RUT), no es válido.
             return false
         }
     }
@@ -170,24 +183,19 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun isOver18(birthDateString: String): Boolean {
         return try {
-            // Intentar parsear con el formato DD/MM/YYYY
             val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
             val birthDate = LocalDate.parse(birthDateString.trim(), formatter)
-            val age = Period.between(birthDate, LocalDate.now()).years
-            age >= 18
+            Period.between(birthDate, LocalDate.now()).years >= 18
         } catch (e: DateTimeParseException) {
-            // Intentar parsear con formato D/M/YYYY (si el usuario pone 1/1/2000)
             try {
                 val formatterShort = DateTimeFormatter.ofPattern("d/M/yyyy")
                 val birthDate = LocalDate.parse(birthDateString.trim(), formatterShort)
-                val age = Period.between(birthDate, LocalDate.now()).years
-                age >= 18
-            } catch (e2: DateTimeParseException) {
-                false // Si ambos formatos fallan, no es válido
+                Period.between(birthDate, LocalDate.now()).years >= 18
+            } catch (_: DateTimeParseException) {
+                false
             }
-        } catch (e: Exception) {
-            false // Cualquier otro error
+        } catch (_: Exception) {
+            false
         }
     }
-
 }

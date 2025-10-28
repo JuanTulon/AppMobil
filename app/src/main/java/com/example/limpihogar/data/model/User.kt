@@ -13,6 +13,7 @@ data class User(
     val fechaNacimiento: String,
     val rut: String? = null,      // <-- AÑADIDO
     val direccion: String? = null, // <-- AÑADIDO
+    val role: String = "user",
     val fechaRegistro: Long = System.currentTimeMillis()
 )
 

@@ -13,5 +13,7 @@ object Routes {
     const val CHECKOUT_FAILED = "checkout_failed"
 
     fun productDetail(productId: Int) = "product_detail/$productId"
-}
 
+    //  NUEVO: ruta para el panel de administración (BackOffice)
+    const val ADMIN_DASHBOARD = "admin_dashboard"
+}

@@ -1,6 +1,5 @@
 package com.example.limpihogar.ui.screens.auth
 
-
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -49,7 +48,6 @@ class DateVisualTransformation : VisualTransformation {
                     else -> offset
                 }.coerceAtMost(output.length)
             }
-
             override fun transformedToOriginal(offset: Int): Int {
                 return when {
                     offset > 5 -> offset - 2
@@ -80,20 +78,27 @@ fun RegisterScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
+    // ➕ Lista de correos que serán admin automáticamente
+    val adminEmails = remember {
+        setOf(
+            "admin@limpiohogar.cl",
+            "admin@limpifresh.cl"
+            // agrega los que quieras
+        )
+    }
 
     val authState by viewModel.authState.collectAsState()
 
     LaunchedEffect(authState.isLoggedIn) {
-        if (authState.isLoggedIn) {
-            onRegisterSuccess()
-        }
+        if (authState.isLoggedIn) onRegisterSuccess()
     }
-    // 3. Cambiamos el fondo a Blanco
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background) // Antes Color.Black
+            .background(MaterialTheme.colorScheme.background)
     )
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -124,51 +129,40 @@ fun RegisterScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "🧼",
-                fontSize = 60.sp
-            )
+            Text(text = "🧼", fontSize = 60.sp)
 
             Text(
                 text = "Únete a LimpioHogar",
-                style = MaterialTheme.typography.headlineSmall, // Usar tipografía del tema
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground, // Color de texto principal
+                color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center
             )
 
             Text(
                 text = "Debes ser mayor de 18 años para registrarte",
-                style = MaterialTheme.typography.bodySmall, // Texto más pequeño
-                color = MaterialTheme.colorScheme.onSurfaceVariant, // Color secundario
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Campo Nombre
             OutlinedTextField(
                 value = nombre,
-                onValueChange = {nombre = it; viewModel.clearError() },
+                onValueChange = { nombre = it; viewModel.clearError() },
                 label = { Text("Nombre completo") },
-                leadingIcon = {Icon(Icons.Filled.Person, null) },
+                leadingIcon = { Icon(Icons.Filled.Person, null) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
-                )
+            )
 
-            // Campo Email
             OutlinedTextField(
                 value = email,
-                onValueChange = {
-                    email = it
-                    viewModel.clearError()
-                },
+                onValueChange = { email = it; viewModel.clearError() },
                 label = { Text("Email") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.Email, null)
-                },
+                leadingIcon = { Icon(imageVector = Icons.Filled.Email, null) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
@@ -177,59 +171,53 @@ fun RegisterScreen(
                 )
             )
 
-            // Campo RUT
             OutlinedTextField(
                 value = rut,
-                onValueChange = {
-                    rut = it
-                    viewModel.clearError() },
+                onValueChange = { rut = it; viewModel.clearError() },
                 label = { Text("RUT (Ej: 12345678-9)") },
                 leadingIcon = { Icon(Icons.Filled.Badge, null) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),)
-
-            // Campo Dirección
-            OutlinedTextField(
-                value = direccion,
-                onValueChange = { direccion = it; viewModel.clearError() },
-                label = { Text("Dirección") },
-                leadingIcon = { Icon(Icons.Filled.Home, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
             )
 
-            // Fecha Nacimiento
+            OutlinedTextField(
+                value = direccion,
+                onValueChange = { direccion = it; viewModel.clearError() },
+                label = { Text("Dirección") },
+                leadingIcon = { Icon(Icons.Filled.Home, null) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+            )
+
             OutlinedTextField(
                 value = fechaNacimiento,
                 onValueChange = {
                     if (it.length <= 8) {
-                        fechaNacimiento = it.filter { char -> char.isDigit() }
+                        fechaNacimiento = it.filter { ch -> ch.isDigit() }
                         viewModel.clearError()
                     }
                 },
                 label = { Text("Fecha nacimiento (DD/MM/YYYY)") },
-                leadingIcon = { Icon(Icons.Filled.DateRange, contentDescription = null) },
+                leadingIcon = { Icon(Icons.Filled.DateRange, null) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                ),
                 visualTransformation = DateVisualTransformation()
             )
 
-            // Campo Contraseña
             OutlinedTextField(
                 value = password,
-                onValueChange = {
-                    password = it
-                    viewModel.clearError()
-                },
+                onValueChange = { password = it; viewModel.clearError() },
                 label = { Text("Contraseña") },
-                leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = null) },
+                leadingIcon = { Icon(Icons.Filled.Lock, null) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                visualTransformation = if (passwordVisible)
-                    VisualTransformation.None else PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Next
@@ -237,28 +225,31 @@ fun RegisterScreen(
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
-                            imageVector = if (passwordVisible)
-                                Icons.Filled.Visibility else Icons.Filled.VisibilityOff, null)
+                            imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                            contentDescription = null
+                        )
                     }
                 }
             )
 
-            // Campo Confirmar Contraseña
             OutlinedTextField(
                 value = confirmPassword,
-                onValueChange = {
-                    confirmPassword = it
-                    viewModel.clearError()
-                },
+                onValueChange = { confirmPassword = it; viewModel.clearError() },
                 label = { Text("Confirmar contraseña") },
-                leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = null) },
+                leadingIcon = { Icon(Icons.Filled.Lock, null) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
                 trailingIcon = {
                     IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                        Icon(if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff, null)
+                        Icon(
+                            if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                            contentDescription = null
+                        )
                     }
                 },
                 isError = confirmPassword.isNotBlank() && password != confirmPassword
@@ -273,7 +264,6 @@ fun RegisterScreen(
                 )
             }
 
-            // Mensaje de error general
             if (authState.errorMessage != null) {
                 Text(
                     text = authState.errorMessage!!,
@@ -286,31 +276,39 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Botón de registro
             Button(
                 onClick = {
                     if (password == confirmPassword) {
-                        // Pasamos los nuevos campos al ViewModel
-                        // Formateamos la fecha aquí antes de enviarla al ViewModel
                         val formattedDate = buildString {
                             fechaNacimiento.forEachIndexed { index, c ->
                                 append(c)
-                                if ((index == 1 || index == 3) && index < fechaNacimiento.lastIndex) {
-                                    append('/')
-                                }
+                                if ((index == 1 || index == 3) && index < fechaNacimiento.lastIndex) append('/')
                             }
                         }
-                        viewModel.register(nombre, email, password, formattedDate, rut, direccion)                    }
+
+                        //  Rol automático: "admin" si el correo está en la lista, si no "user"
+                        val role = if (adminEmails.contains(email.trim().lowercase())) "admin" else "user"
+
+                        // ⤵ Llamada con el nuevo parámetro role (ver mínimo cambio en el ViewModel abajo)
+                        viewModel.register(
+                            nombre = nombre,
+                            email = email,
+                            password = password,
+                            fechaNacimiento = formattedDate,
+                            rut = rut,
+                            direccion = direccion,
+                            role = role
+                        )
+                    }
                 },
-                // Habilitar solo si todos los campos están llenos y contraseñas coinciden
                 enabled = !authState.isLoading &&
                         nombre.isNotBlank() &&
                         email.isNotBlank() &&
                         password.isNotBlank() &&
                         confirmPassword.isNotBlank() &&
                         fechaNacimiento.isNotBlank() &&
-                        rut.isNotBlank() &&             // <-- Validación RUT
-                        direccion.isNotBlank() &&       // <-- Validación Dirección
+                        rut.isNotBlank() &&
+                        direccion.isNotBlank() &&
                         password == confirmPassword,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -329,7 +327,7 @@ fun RegisterScreen(
             ) {
                 Text(
                     text = "Ya tengo una cuenta",
-                    color = MaterialTheme.colorScheme.secondary, // Color secundario
+                    color = MaterialTheme.colorScheme.secondary,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
