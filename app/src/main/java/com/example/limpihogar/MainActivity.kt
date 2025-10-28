@@ -41,31 +41,30 @@ fun MainApp() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    // Rutas que NO deben mostrar el BottomBar (Login, Registro, etc.)
+    // Rutas en las que NO queremos mostrar la BottomBar
     val noBottomBarRoutes = listOf(
         Routes.LOGIN,
-        Routes.REGISTER
-        // Añadiremos aquí las rutas de Checkout y Admin cuando las creemos
+        Routes.REGISTER,
+        Routes.ADMIN_DASHBOARD,   // 👑 oculto en BackOffice
+        Routes.CHECKOUT_SUCCESS,  // opcional
+        Routes.CHECKOUT_FAILED    // opcional
     )
-    // Mostramos la barra si la ruta actual NO está en la lista anterior
+
     val shouldShowBottomBar = currentDestination?.route !in noBottomBarRoutes
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background, // Color de fondo claro
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             if (shouldShowBottomBar) {
                 NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant, // Color de tema claro
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 ) {
-                    // --- ACTUALIZADO ---
-                    // Lista de items (ahora sin Perfil)
                     val items = listOf(
                         BottomNavItem.Home,
                         BottomNavItem.Cart,
                         BottomNavItem.Profile
                     )
-
                     items.forEach { item ->
                         val isSelected = currentDestination?.hierarchy?.any {
                             it.route == item.route
@@ -84,7 +83,6 @@ fun MainApp() {
                                     restoreState = true
                                 }
                             },
-                            // Colores del tema claro
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,

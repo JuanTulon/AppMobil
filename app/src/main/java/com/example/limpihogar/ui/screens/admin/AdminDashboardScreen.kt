@@ -1,7 +1,14 @@
 @file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 
 package com.example.limpihogar.ui.screens.admin
-
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -59,7 +66,7 @@ fun AdminDashboardScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Bienvenido Administrador",
+                text = " Bienvenido Administrador",
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -123,15 +130,54 @@ private fun ProductAdminItem(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val context = LocalContext.current
+    // Busca el drawable por nombre (ej: "quix", "clorox", "poett", sin extensión)
+    val imageResId = remember(product.imagenUrl) {
+        if (product.imagenUrl.isNullOrBlank()) 0
+        else context.resources.getIdentifier(product.imagenUrl, "drawable", context.packageName)
+    }
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(text = product.nombre, style = MaterialTheme.typography.titleMedium)
+            // Imagen (con fallback si no existe el recurso)
+            if (imageResId != 0) {
+                Image(
+                    painter = painterResource(id = imageResId),
+                    contentDescription = product.nombre,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                        .clip(RoundedCornerShape(12.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Sin imagen", style = MaterialTheme.typography.labelMedium)
+                }
+            }
+
+            Divider(color = MaterialTheme.colorScheme.outlineVariant)
+
+            Text(
+                text = product.nombre,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
             Text(
                 text = "Marca: ${product.marca ?: "-"}  •  Formato: ${product.formato ?: "-"}",
                 style = MaterialTheme.typography.bodyMedium,
@@ -141,6 +187,7 @@ private fun ProductAdminItem(
                 text = "Precio: $${product.precio.toInt()}  •  Stock: ${product.stock}",
                 style = MaterialTheme.typography.bodyMedium
             )
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
