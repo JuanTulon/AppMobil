@@ -17,7 +17,8 @@ import com.example.limpihogar.ui.screens.product.ProductDetailScreen
 import com.example.limpihogar.ui.screens.profile.ProfileScreen
 import com.example.limpihogar.ui.screens.chekout.ChekoutSuccessScreen
 import com.example.limpihogar.ui.screens.chekout.CheckoutFailedScreen
-import com.example.limpihogar.ui.screens.admin.AdminDashboardScreen // 🔹 Import para el panel admin
+import com.example.limpihogar.ui.screens.admin.AdminDashboardScreen
+import com.example.limpihogar.ui.screens.admin.AdminAddProductScreen  //  Import de la nueva pantalla
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -31,19 +32,17 @@ fun NavGraph(
         startDestination = startDestination,
         modifier = modifier
     ) {
-        // 🔹 LOGIN
+        // LOGIN
         composable(Routes.LOGIN) {
             LoginScreen(
-                onNavigateToRegister = {
-                    navController.navigate(Routes.REGISTER)
-                },
+                onNavigateToRegister = { navController.navigate(Routes.REGISTER) },
                 onLoginSuccess = { isAdmin ->
                     if (isAdmin) {
-                        navController.navigate(Routes.ADMIN_DASHBOARD) { // 👑 admin
+                        navController.navigate(Routes.ADMIN_DASHBOARD) {
                             popUpTo(Routes.LOGIN) { inclusive = true }
                         }
                     } else {
-                        navController.navigate(Routes.HOME) { // 🛍 usuario normal
+                        navController.navigate(Routes.HOME) {
                             popUpTo(Routes.LOGIN) { inclusive = true }
                         }
                     }
@@ -51,7 +50,7 @@ fun NavGraph(
             )
         }
 
-        // 🔹 REGISTER
+        // REGISTER
         composable(Routes.REGISTER) {
             RegisterScreen(
                 onNavigateBack = { navController.popBackStack() },
@@ -63,7 +62,7 @@ fun NavGraph(
             )
         }
 
-        // 🔹 HOME / CATÁLOGO
+        // HOME / CATÁLOGO
         composable(Routes.HOME) {
             CatalogScreen(
                 onProductClick = { productId ->
@@ -72,7 +71,7 @@ fun NavGraph(
             )
         }
 
-        // 🔹 PRODUCT DETAIL
+        // PRODUCT DETAIL
         composable(
             route = Routes.PRODUCT_DETAIL,
             arguments = listOf(navArgument("productId") { type = NavType.IntType })
@@ -84,7 +83,7 @@ fun NavGraph(
             )
         }
 
-        // 🔹 CART
+        // CART
         composable(Routes.CART) {
             CartScreen(
                 onNavigateToCheckoutSuccess = {
@@ -98,7 +97,7 @@ fun NavGraph(
             )
         }
 
-        // 🔹 PROFILE
+        // PROFILE
         composable(Routes.PROFILE) {
             ProfileScreen(
                 onLogout = {
@@ -107,7 +106,7 @@ fun NavGraph(
             )
         }
 
-        // 🔹 CHECKOUT SUCCESS
+        // CHECKOUT SUCCESS
         composable(Routes.CHECKOUT_SUCCESS) {
             ChekoutSuccessScreen(
                 onNavigateToHome = {
@@ -116,15 +115,19 @@ fun NavGraph(
             )
         }
 
-        // 🔹 CHECKOUT FAILED
+        // CHECKOUT FAILED
         composable(Routes.CHECKOUT_FAILED) {
             CheckoutFailedScreen(onNavigateBackToCart = { navController.popBackStack() })
         }
 
-        // 🔹 NUEVO: PANEL DE ADMINISTRADOR
+        // PANEL DE ADMINISTRADOR
         composable(Routes.ADMIN_DASHBOARD) {
             AdminDashboardScreen(navController)
         }
+
+        //  NUEVO: FORMULARIO "AGREGAR PRODUCTO"
+        composable(Routes.ADMIN_ADD_PRODUCT) {
+            AdminAddProductScreen(navController)
+        }
     }
 }
-

@@ -1,40 +1,40 @@
 @file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 
 package com.example.limpihogar.ui.screens.admin
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.limpihogar.data.model.Product
+import com.example.limpihogar.navigation.Routes
 import com.example.limpihogar.ui.viewmodel.ProductViewModel
 import kotlinx.coroutines.flow.Flow
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.*
 
 @Composable
 fun AdminDashboardScreen(
     navController: NavController,
     productViewModel: ProductViewModel = viewModel()
 ) {
-    //  Leemos productos desde un Flow del ViewModel:
-    //    Asegúrate de que ProductViewModel tenga: fun getAllProducts(): Flow<List<Product>>
     val productsFlow: Flow<List<Product>> = productViewModel.getAllProducts()
     val products: List<Product> by productsFlow.collectAsState(initial = emptyList())
 
@@ -48,13 +48,6 @@ fun AdminDashboardScreen(
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
-            )
-        },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { /* TODO: abrir formulario de alta (placeholder) */ },
-                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text("Agregar producto") }
             )
         }
     ) { padding ->
@@ -99,11 +92,12 @@ fun AdminDashboardScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 8.dp)
                 ) {
                     items(
                         items = products,
-                        key = { p -> p.id ?: p.hashCode() } // si id es nullable
+                        key = { p -> p.id ?: p.hashCode() }
                     ) { p ->
                         ProductAdminItem(
                             product = p,
@@ -114,11 +108,24 @@ fun AdminDashboardScreen(
                 }
             }
 
-            OutlinedButton(
-                onClick = { navController.navigate("login") },
+            // 🔹 Botón AGREGAR PRODUCTO → navega al formulario
+            Button(
+                onClick = { navController.navigate(Routes.ADMIN_ADD_PRODUCT) }, // 👈 AQUÍ LA NAVEGACIÓN
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp)
+                    .height(56.dp),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Agregar producto")
+            }
+
+            OutlinedButton(
+                onClick = { navController.navigate(Routes.LOGIN) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
             ) { Text("Cerrar Sesión") }
         }
     }
@@ -131,7 +138,6 @@ private fun ProductAdminItem(
     onDelete: () -> Unit
 ) {
     val context = LocalContext.current
-    // Busca el drawable por nombre (ej: "quix", "clorox", "poett", sin extensión)
     val imageResId = remember(product.imagenUrl) {
         if (product.imagenUrl.isNullOrBlank()) 0
         else context.resources.getIdentifier(product.imagenUrl, "drawable", context.packageName)
@@ -147,7 +153,6 @@ private fun ProductAdminItem(
             modifier = Modifier.padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Imagen (con fallback si no existe el recurso)
             if (imageResId != 0) {
                 Image(
                     painter = painterResource(id = imageResId),

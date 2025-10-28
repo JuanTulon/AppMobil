@@ -16,4 +16,8 @@ object Routes {
 
     //  NUEVO: ruta para el panel de administración (BackOffice)
     const val ADMIN_DASHBOARD = "admin_dashboard"
+
+    const val ADMIN_ADD_PRODUCT = "admin_add_product"
+
+
 }

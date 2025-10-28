@@ -1,6 +1,5 @@
 package com.example.limpihogar
 
-
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -41,14 +40,16 @@ fun MainApp() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    // Rutas en las que NO queremos mostrar la BottomBar
+
     val noBottomBarRoutes = listOf(
         Routes.LOGIN,
         Routes.REGISTER,
-        Routes.ADMIN_DASHBOARD,   // 👑 oculto en BackOffice
-        Routes.CHECKOUT_SUCCESS,  // opcional
-        Routes.CHECKOUT_FAILED    // opcional
+        Routes.ADMIN_DASHBOARD,
+        Routes.ADMIN_ADD_PRODUCT,
+        Routes.CHECKOUT_SUCCESS,
+        Routes.CHECKOUT_FAILED      //
     )
+
 
     val shouldShowBottomBar = currentDestination?.route !in noBottomBarRoutes
 
