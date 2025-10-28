@@ -14,7 +14,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -26,6 +25,42 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.limpihogar.ui.viewmodel.AuthViewModel
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.OffsetMapping
+
+class DateVisualTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val input = text.text.filter { it.isDigit() }.take(8)
+        val output = buildString {
+            input.forEachIndexed { index, char ->
+                append(char)
+                if ((index == 1 || index == 3) && index < input.lastIndex) {
+                    append('/')
+                }
+            }
+        }
+
+        val offsetMapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                return when {
+                    offset > 3 -> offset + 2
+                    offset > 1 -> offset + 1
+                    else -> offset
+                }.coerceAtMost(output.length)
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {
+                return when {
+                    offset > 5 -> offset - 2
+                    offset > 2 -> offset - 1
+                    else -> offset
+                }.coerceAtMost(input.length)
+            }
+        }
+        return TransformedText(AnnotatedString(output), offsetMapping)
+    }
+}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -168,13 +203,18 @@ fun RegisterScreen(
             // Fecha Nacimiento
             OutlinedTextField(
                 value = fechaNacimiento,
-                onValueChange = { fechaNacimiento = it; viewModel.clearError() },
+                onValueChange = {
+                    if (it.length <= 8) {
+                        fechaNacimiento = it.filter { char -> char.isDigit() }
+                        viewModel.clearError()
+                    }
+                },
                 label = { Text("Fecha nacimiento (DD/MM/YYYY)") },
                 leadingIcon = { Icon(Icons.Filled.DateRange, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
-                placeholder = { Text("Ej: 15/06/1995") }
+                visualTransformation = DateVisualTransformation()
             )
 
             // Campo Contraseña
@@ -251,8 +291,16 @@ fun RegisterScreen(
                 onClick = {
                     if (password == confirmPassword) {
                         // Pasamos los nuevos campos al ViewModel
-                        viewModel.register(nombre, email, password, fechaNacimiento, rut, direccion)
-                    }
+                        // Formateamos la fecha aquí antes de enviarla al ViewModel
+                        val formattedDate = buildString {
+                            fechaNacimiento.forEachIndexed { index, c ->
+                                append(c)
+                                if ((index == 1 || index == 3) && index < fechaNacimiento.lastIndex) {
+                                    append('/')
+                                }
+                            }
+                        }
+                        viewModel.register(nombre, email, password, formattedDate, rut, direccion)                    }
                 },
                 // Habilitar solo si todos los campos están llenos y contraseñas coinciden
                 enabled = !authState.isLoading &&
@@ -288,28 +336,5 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
         }
-    }
-}
-
-fun validarRut(rut: String): Boolean {
-    try {
-        val rutLimpio = rut.replace(Regex("[.-]"), "").uppercase()
-        if (rutLimpio.length !in 8..9) return false
-
-        val cuerpo = rutLimpio.dropLast(1).toInt()
-        val dv = rutLimpio.last()
-
-        var m = 0
-        var s = 1
-        var t = cuerpo
-        while (t != 0) {
-            s = (s + t % 10 * (9 - m++ % 6)) % 11
-            t /= 10
-        }
-        val dvCalculado = if (s > 0) (s + 47).toChar() else 'K'
-
-        return dv == dvCalculado
-    } catch (e: Exception) {
-        return false
     }
 }

@@ -1,9 +1,7 @@
 package com.example.limpihogar.ui.screens.profile
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -12,11 +10,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.limpihogar.ui.viewmodel.AuthViewModel
 
@@ -24,8 +20,6 @@ import com.example.limpihogar.ui.viewmodel.AuthViewModel
 @Composable
 fun ProfileScreen(
     onLogout: () -> Unit,
-    onNavigateToAdminProductList: () -> Unit, // Para "Gestionar Productos"
-    onNavigateToAddProduct: () -> Unit,       // Para "Agregar Producto"
     viewModel: AuthViewModel = viewModel()
 ) {
     val authState by viewModel.authState.collectAsState()
@@ -126,52 +120,6 @@ fun ProfileScreen(
                         label = "Fecha de Nacimiento",
                         value = currentUser?.fechaNacimiento ?: "No ingresada"
                     )
-                }
-            }
-
-            // --- Tarjeta de Panel de Administrador ---
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer, // Color diferente
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer // Contenido que contraste
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        text = "Panel de Administrador",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                        // El color lo toma del contentColor de la Card
-                    )
-                    // Botón para ver lista (Visual)
-                    Button(
-                        onClick = onNavigateToAdminProductList,
-                        modifier = Modifier.fillMaxWidth(),
-                        // Colores por defecto del tema para botón primario
-                        // colors = ButtonDefaults.buttonColors(...)
-                    ) {
-                        Icon(Icons.Filled.Settings, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Gestionar Productos (Visual)")
-                    }
-                    // Botón para añadir producto (Visual) - Usamos OutlinedButton para diferenciar
-                    OutlinedButton(
-                        onClick = onNavigateToAddProduct,
-                        modifier = Modifier.fillMaxWidth()
-                        // Colores por defecto del tema para botón outlined
-                    ) {
-                        Icon(Icons.Filled.Add, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Agregar Producto (Visual)")
-                    }
                 }
             }
 

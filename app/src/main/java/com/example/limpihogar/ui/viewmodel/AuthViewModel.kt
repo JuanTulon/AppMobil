@@ -61,7 +61,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // --- REGISTER (ACTUALIZADO CON RUT/DIRECCIÓN Y 6 PARÁMETROS) ---
     @RequiresApi(Build.VERSION_CODES.O)
     fun register(
         nombre: String,
@@ -139,21 +138,34 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         return Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
-    // --- Validación básica de RUT (formato XXXXXXXX-X o XX.XXX.XXX-X) ---
+    // --- Validación rut formato y calculo matematico ---
     private fun isValidRut(rut: String): Boolean {
-        val cleanRut = rut.replace(".", "").replace("-", "") // Limpiar puntos y guión
-        if (cleanRut.length < 2) return false
-        val body = cleanRut.substring(0, cleanRut.length - 1)
-        val verifier = cleanRut.substring(cleanRut.length - 1).uppercase()
+        try {
+            // 1. LIMPIEZA Y FORMATO BÁSICO
+            val cleanRut = rut.replace(Regex("[.-]"), "").uppercase() // Quita puntos y guion
+            if (cleanRut.length !in 8..9) return false // Comprueba el largo
 
-        if (!body.all { it.isDigit() }) return false // El cuerpo debe ser numérico
-        if (verifier !in "0123456789K") return false // El dígito verificador debe ser válido
+            val body = cleanRut.dropLast(1).toInt() // Separa el cuerpo y lo convierte a número
+            val verifier = cleanRut.last() // Obtiene el dígito verificador ingresado
 
-        // Validación de formato simple por ahora:
-        val rutPattern = Regex("""^(\d{1,2}(\.\d{3}){2}-[\dkK]|\d{7,8}-[\dkK])$""")
-        return rutPattern.matches(rut.trim()) // Usamos el rut original con formato para el regex
+            // 2. CÁLCULO MATEMÁTICO (MÓDULO 11)
+            var m = 0
+            var s = 1
+            var t = body
+            while (t != 0) {
+                s = (s + t % 10 * (9 - m++ % 6)) % 11
+                t /= 10
+            }
+            val dvCalculado = if (s > 0) (s + 47).toChar() else 'K'
+
+            // 3. COMPARACIÓN FINAL
+            return verifier == dvCalculado // Compara si el dígito ingresado es igual al calculado
+
+        } catch (e: Exception) {
+            // Si algo falla (ej. hay letras en el cuerpo del RUT), no es válido.
+            return false
+        }
     }
-
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun isOver18(birthDateString: String): Boolean {

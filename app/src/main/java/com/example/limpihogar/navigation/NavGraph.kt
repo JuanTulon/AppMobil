@@ -100,10 +100,7 @@ fun NavGraph(
             ProfileScreen(
                 onLogout = {
                     navController.navigate(Routes.LOGIN) { popUpTo(0) { inclusive = true } }
-                },
-                // Navegación COMENTADA para que compile sin las pantallas
-                onNavigateToAdminProductList = { /* navController.navigate(Routes.ADMIN_PRODUCT_LIST) */ },
-                onNavigateToAddProduct = { /* navController.navigate(Routes.ADMIN_ADD_PRODUCT) */ }
+                }
             )
         }
 
