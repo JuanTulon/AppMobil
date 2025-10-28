@@ -32,6 +32,9 @@ class ProductViewModel(application: Application) : AndroidViewModel(application)
         loadProducts()
     }
 
+    //  Expuesto para AdminDashboardScreen (lista cruda desde Room con Flow)
+    fun getAllProducts(): Flow<List<Product>> = repository.getAllProducts()
+
     private fun loadProducts() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
@@ -78,7 +81,11 @@ class ProductViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun applyFilters(category: Category?, priceRange: String) {
-        _uiState.value = _uiState.value.copy(selectedCategory = category, selectedPriceRange = priceRange, searchQuery = "")
+        _uiState.value = _uiState.value.copy(
+            selectedCategory = category,
+            selectedPriceRange = priceRange,
+            searchQuery = ""
+        )
         loadProducts()
     }
 
@@ -86,5 +93,3 @@ class ProductViewModel(application: Application) : AndroidViewModel(application)
         return repository.getProductById(productId)
     }
 }
-
-

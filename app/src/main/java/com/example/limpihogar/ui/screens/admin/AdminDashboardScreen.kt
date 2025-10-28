@@ -3,15 +3,34 @@
 package com.example.limpihogar.ui.screens.admin
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.limpihogar.data.model.Product
+import com.example.limpihogar.ui.viewmodel.ProductViewModel
+import kotlinx.coroutines.flow.Flow
 
 @Composable
-fun AdminDashboardScreen(navController: NavController) {
+fun AdminDashboardScreen(
+    navController: NavController,
+    productViewModel: ProductViewModel = viewModel()
+) {
+    //  Leemos productos desde un Flow del ViewModel:
+    //    Asegúrate de que ProductViewModel tenga: fun getAllProducts(): Flow<List<Product>>
+    val productsFlow: Flow<List<Product>> = productViewModel.getAllProducts()
+    val products: List<Product> by productsFlow.collectAsState(initial = emptyList())
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -23,36 +42,112 @@ fun AdminDashboardScreen(navController: NavController) {
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = { /* TODO: abrir formulario de alta (placeholder) */ },
+                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                text = { Text("Agregar producto") }
+            )
         }
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = " Bienvenido Administrador",
+                text = "Bienvenido Administrador",
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.primary
             )
 
-            Button(onClick = { /* TODO */ }, modifier = Modifier.fillMaxWidth()) {
-                Text("Gestionar Productos")
-            }
-            Button(onClick = { /* TODO */ }, modifier = Modifier.fillMaxWidth()) {
-                Text("Gestionar Usuarios")
-            }
-            Button(onClick = { /* TODO */ }, modifier = Modifier.fillMaxWidth()) {
-                Text("Ver Pedidos")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(onClick = { /* TODO */ }, modifier = Modifier.weight(1f)) { Text("Gestionar Productos") }
+                Button(onClick = { /* TODO */ }, modifier = Modifier.weight(1f)) { Text("Gestionar Usuarios") }
+                Button(onClick = { /* TODO */ }, modifier = Modifier.weight(1f)) { Text("Ver Pedidos") }
             }
 
-            Spacer(Modifier.height(30.dp))
+            Divider()
 
-            OutlinedButton(onClick = { navController.navigate("login") }, modifier = Modifier.fillMaxWidth()) {
-                Text("Cerrar Sesión")
+            Text(
+                text = "Productos (${products.size})",
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold)
+            )
+
+            if (products.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("No hay productos cargados.")
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(
+                        items = products,
+                        key = { p -> p.id ?: p.hashCode() } // si id es nullable
+                    ) { p ->
+                        ProductAdminItem(
+                            product = p,
+                            onEdit = { /* TODO */ },
+                            onDelete = { /* TODO */ }
+                        )
+                    }
+                }
+            }
+
+            OutlinedButton(
+                onClick = { navController.navigate("login") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            ) { Text("Cerrar Sesión") }
+        }
+    }
+}
+
+@Composable
+private fun ProductAdminItem(
+    product: Product,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(text = product.nombre, style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = "Marca: ${product.marca ?: "-"}  •  Formato: ${product.formato ?: "-"}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "Precio: $${product.precio.toInt()}  •  Stock: ${product.stock}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedButton(onClick = onEdit, modifier = Modifier.weight(1f)) { Text("Editar") }
+                OutlinedButton(onClick = onDelete, modifier = Modifier.weight(1f)) { Text("Eliminar") }
             }
         }
     }

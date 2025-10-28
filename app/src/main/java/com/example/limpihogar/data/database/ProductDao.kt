@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ProductDao {
 
+    //  Nuevo método para el BackOffice
     @Query("SELECT * FROM products ORDER BY nombre ASC")
     fun getAllProducts(): Flow<List<Product>>
 
@@ -31,4 +32,3 @@ interface ProductDao {
     @Delete
     suspend fun deleteProduct(product: Product)
 }
-
