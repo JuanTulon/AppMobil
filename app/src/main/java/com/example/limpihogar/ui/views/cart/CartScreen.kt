@@ -34,10 +34,8 @@ fun CartScreen(
     val cartItems by viewModel.cartItems.collectAsState()
     val cartTotal by viewModel.cartTotal.collectAsState()
 
-    // Este estado simulará un error. En una app real, vendría de un ViewModel.
     var simularError by remember { mutableStateOf(false) }
 
-    // 🔹 Cálculos de precios
     val subtotal = cartTotal ?: 0.0
     val iva = subtotal * 0.19 // 19% de IVA
     val totalConIva = subtotal + iva
@@ -67,20 +65,19 @@ fun CartScreen(
                 Column {
                     Text(
                         text = "Mi Carrito",
-                        style = MaterialTheme.typography.headlineSmall, // Tamaño de título
-                        color = MaterialTheme.colorScheme.onSurface // Color de texto principal
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "${cartItems.size} productos",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant // Color de texto secundario
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
         }
 
         if (cartItems.isEmpty()) {
-            // Carrito vacío
             Box(
                 modifier = Modifier.fillMaxSize().padding(16.dp),
                 contentAlignment = Alignment.Center
@@ -92,19 +89,18 @@ fun CartScreen(
                     Text(text = "🛒", fontSize = 80.sp)
                     Text(
                         text = "Tu carrito está vacío",
-                        style = MaterialTheme.typography.titleLarge, // Título
+                        style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
                         text = "Explora nuestro catálogo y agrega los productos que necesitas.",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant, // Texto secundario
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
                 }
             }
         } else {
-            // Lista de productos
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(16.dp),
@@ -123,7 +119,6 @@ fun CartScreen(
                 }
             }
 
-            // Resumen y botón de compra
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.colorScheme.surfaceVariant,
@@ -133,7 +128,6 @@ fun CartScreen(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Switch para simular error
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -143,17 +137,15 @@ fun CartScreen(
                         Switch(
                             checked = simularError,
                             onCheckedChange = { simularError = it },
-                            colors = SwitchDefaults.colors( // Colores del tema para Switch
+                            colors = SwitchDefaults.colors(
                                 checkedThumbColor = MaterialTheme.colorScheme.primary,
                                 checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
                                 uncheckedThumbColor = MaterialTheme.colorScheme.outline,
                                 uncheckedTrackColor = MaterialTheme.colorScheme.surface
                             )
-
                         )
                     }
 
-                    // Resumen
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -162,7 +154,6 @@ fun CartScreen(
                         Text(formatPrice(subtotal), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
                     }
 
-                    // 🔹 Fila para el IVA
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -179,22 +170,19 @@ fun CartScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("Total", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
-                        // 🔹 Total con IVA incluido
                         Text(formatPrice(totalConIva), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                     }
 
-                    // Botón de compra
                     Button(
                         onClick = {
                             if (simularError) {
                                 onNavigateToCheckoutFailed()
                             } else {
-                                viewModel.clearCart()
-                                onNavigateToCheckoutSuccess()
+                                onNavigateToCheckoutSuccess() // No se limpia el carrito aquí
                             }
                         },
                         modifier = Modifier.fillMaxWidth().height(56.dp),
-                        shape = RoundedCornerShape(12.dp) // Bordes redondeados
+                        shape = RoundedCornerShape(12.dp)
                     ) {
                         Text("Finalizar Compra", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
                     }
@@ -214,14 +202,13 @@ fun CartItemCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(1.dp) // Sombra muy sutil
+        elevation = CardDefaults.cardElevation(1.dp)
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Imagen (Usando emoji como placeholder)
             Box(
                 modifier = Modifier
                     .size(80.dp)
@@ -232,7 +219,6 @@ fun CartItemCard(
                 Text(text = "🧼", fontSize = 32.sp)
             }
 
-            // Información
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -241,65 +227,50 @@ fun CartItemCard(
                     text = cartItem.nombre,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2 // Evita que nombres largos descuadren
+                    maxLines = 2
                 )
                 Text(
                     text = formatPrice(cartItem.precio),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.primary, // Precio con color primario
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth() // Ocupa todo el ancho disponible
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    // Controles de cantidad
                     Surface(
                         shape = RoundedCornerShape(8.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant, // Fondo controles
+                        color = MaterialTheme.colorScheme.surfaceVariant,
                         tonalElevation = 1.dp
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             IconButton(
                                 onClick = { onQuantityChange(cartItem.cantidad - 1) },
                                 modifier = Modifier.size(36.dp),
-                                enabled = cartItem.cantidad > 0 // Deshabilitar si es 0 (se borraría)
+                                enabled = cartItem.cantidad > 0
                             ) {
-                                Icon(
-                                    Icons.Filled.Remove,
-                                    "Disminuir",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Icon(Icons.Filled.Remove, "Disminuir", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
-                            // Texto que muestra la cantidad actual
                             Text(
                                 text = "${cartItem.cantidad}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 12.dp) // Espacio alrededor del número
+                                modifier = Modifier.padding(horizontal = 12.dp)
                             )
                             IconButton(
                                 onClick = { onQuantityChange(cartItem.cantidad + 1) },
                                 modifier = Modifier.size(36.dp)
                             ) {
-                                Icon(
-                                    Icons.Filled.Add,
-                                    "Aumentar",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Icon(Icons.Filled.Add, "Aumentar", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
-                    } // Fin Surface Controles Cantidad
+                    }
 
-                    // Botón eliminar
                     IconButton(onClick = onRemove, modifier = Modifier.size(36.dp)) {
-                        Icon(
-                            Icons.Filled.Delete,
-                            "Eliminar",
-                            tint = MaterialTheme.colorScheme.error // Rojo para eliminar
-                        )
+                        Icon(Icons.Filled.Delete, "Eliminar", tint = MaterialTheme.colorScheme.error)
                     }
                 }
             }
