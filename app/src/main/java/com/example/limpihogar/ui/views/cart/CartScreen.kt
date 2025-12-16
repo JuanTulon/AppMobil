@@ -37,6 +37,11 @@ fun CartScreen(
     // Este estado simulará un error. En una app real, vendría de un ViewModel.
     var simularError by remember { mutableStateOf(false) }
 
+    // 🔹 Cálculos de precios
+    val subtotal = cartTotal ?: 0.0
+    val iva = subtotal * 0.19 // 19% de IVA
+    val totalConIva = subtotal + iva
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -154,7 +159,16 @@ fun CartScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text("Subtotal", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(formatPrice(cartTotal ?: 0.0), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+                        Text(formatPrice(subtotal), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+                    }
+
+                    // 🔹 Fila para el IVA
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("IVA (19%)", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(formatPrice(iva), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
                     }
 
                     Divider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -165,7 +179,8 @@ fun CartScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("Total", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
-                        Text(formatPrice(cartTotal ?: 0.0), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                        // 🔹 Total con IVA incluido
+                        Text(formatPrice(totalConIva), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                     }
 
                     // Botón de compra
