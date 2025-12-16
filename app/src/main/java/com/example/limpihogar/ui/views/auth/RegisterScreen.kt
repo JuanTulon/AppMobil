@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -97,7 +98,7 @@ fun RegisterScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(Color(0xFFE8F5E9))
     )
 
     Scaffold(
@@ -117,7 +118,7 @@ fun RegisterScreen(
                 modifier = Modifier.shadow(elevation = 4.dp)
             )
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color(0xFFE8F5E9)
     ) { paddingValues ->
         Column(
             modifier = Modifier
