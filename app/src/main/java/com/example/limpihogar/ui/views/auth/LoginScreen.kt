@@ -47,7 +47,7 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(Color(0xFFE8F5E9)) // Color de fondo verde claro
     ) {
         Column(
             modifier = Modifier
