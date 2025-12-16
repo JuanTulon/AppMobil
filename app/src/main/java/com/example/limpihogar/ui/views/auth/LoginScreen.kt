@@ -167,7 +167,7 @@ fun LoginScreen(
                 onClick = { viewModel.login(email, password) },
                 enabled = !authState.isLoading && email.isNotBlank() && password.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
+                    containerColor = Color(0xFF2196F3),
                     contentColor = MaterialTheme.colorScheme.onPrimary,
                     disabledContainerColor = Color.Gray
                 ),
