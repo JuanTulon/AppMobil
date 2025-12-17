@@ -35,6 +35,8 @@ fun CartScreen(
     val cartTotal by viewModel.cartTotal.collectAsState()
 
     var simularError by remember { mutableStateOf(false) }
+    // 🔹 Estado para la moneda seleccionada
+    var currentCurrency by remember { mutableStateOf("CLP") }
 
     val subtotal = cartTotal ?: 0.0
     val iva = subtotal * 0.19 // 19% de IVA
@@ -146,12 +148,13 @@ fun CartScreen(
                         )
                     }
 
+                    // 🔹 Resumen con precios convertidos
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text("Subtotal", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(formatPrice(subtotal), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+                        Text(formatPriceWithCurrency(subtotal, currentCurrency), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
                     }
 
                     Row(
@@ -159,7 +162,7 @@ fun CartScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text("IVA (19%)", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(formatPrice(iva), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+                        Text(formatPriceWithCurrency(iva, currentCurrency), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
                     }
 
                     Divider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -170,15 +173,39 @@ fun CartScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("Total", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
-                        Text(formatPrice(totalConIva), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                        Text(formatPriceWithCurrency(totalConIva, currentCurrency), style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                     }
+
+                    // 🔹 Botones para convertir moneda
+                    Text("Ver total en:", style = MaterialTheme.typography.labelMedium, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)
+                    ) {
+                        val currencies = listOf("CLP", "USD", "EUR")
+                        currencies.forEach { currency ->
+                            if (currentCurrency == currency) {
+                                Button(onClick = { /* Ya seleccionado */ }, modifier = Modifier.width(90.dp)) {
+                                    Text(currency)
+                                }
+                            } else {
+                                OutlinedButton(onClick = { currentCurrency = currency }, modifier = Modifier.width(90.dp)) {
+                                    Text(currency)
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Button(
                         onClick = {
                             if (simularError) {
                                 onNavigateToCheckoutFailed()
                             } else {
-                                onNavigateToCheckoutSuccess() // No se limpia el carrito aquí
+                                onNavigateToCheckoutSuccess()
                             }
                         },
                         modifier = Modifier.fillMaxWidth().height(56.dp),
@@ -230,7 +257,7 @@ fun CartItemCard(
                     maxLines = 2
                 )
                 Text(
-                    text = formatPrice(cartItem.precio),
+                    text = formatPrice(cartItem.precio), // El precio del item se mantiene en CLP
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold
@@ -278,7 +305,29 @@ fun CartItemCard(
     }
 }
 
+// Formato de precio original para items individuales
 private fun formatPrice(price: Double): String {
     val format = NumberFormat.getCurrencyInstance(Locale("es", "CL"))
     return format.format(price)
+}
+
+// 🔹 Nueva función para convertir y formatear el precio
+private fun formatPriceWithCurrency(price: Double, currency: String): String {
+    // Tasas de cambio aproximadas
+    val usdRate = 930.0
+    val eurRate = 1010.0
+
+    val (convertedPrice, locale) = when (currency) {
+        "USD" -> price / usdRate to Locale.US
+        "EUR" -> price / eurRate to Locale.GERMANY
+        else -> price to Locale("es", "CL")
+    }
+
+    val format = NumberFormat.getCurrencyInstance(locale)
+    // Para monedas extranjeras, es bueno mostrar decimales
+    if (currency == "USD" || currency == "EUR") {
+        format.minimumFractionDigits = 2
+        format.maximumFractionDigits = 2
+    }
+    return format.format(convertedPrice)
 }
